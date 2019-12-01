@@ -3,7 +3,6 @@
    
   export let name
   export let state
-
 </script>
 
 <div>

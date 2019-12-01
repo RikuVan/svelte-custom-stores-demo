@@ -1,10 +1,11 @@
 <script>
 	import Layout from './Layout.svelte'
-  import { store } from './xstate-store.js'
+	import { store } from './xstate-store.js'
+	
   const { state, send } = store
 </script>
 
-<Layout name="App4.svelte" state={$state}>
+<Layout name="xstate_store" state={$state}>
 	<div class="buttons">
 		<button on:click={() => send('SHOW')}>
 			Show

@@ -1,10 +1,5 @@
 <script>
 	import { scale } from 'svelte/transition'
-  // import { state } from './basic-store.js'
-  //1 import { state } from './observable-store.js'
-  //2 import { store }  from './reducer-store.js'
-  //3 import { state } from './simple-state-machine-store.js'
-  //4 import { state } from './immer-store.js'
   import { store } from './xstate-store.js'
 
   const {state} = store
