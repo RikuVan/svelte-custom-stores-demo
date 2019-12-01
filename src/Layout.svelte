@@ -35,7 +35,11 @@
 	<p>Controlled from {name}</p>
 	<p>
 		Current:
-		<strong>{state.visible}</strong>
+		<strong>{state.visible === true ? 'VISIBLE' : 'HIDDEN'}</strong>
+	</p>
+	<p>
+		Dogs:
+		<strong>{state.dogs}</strong>
 	</p>
 	<slot />
 </div>
