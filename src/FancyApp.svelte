@@ -8,14 +8,14 @@
 		})
 	}
 
-	function changeDogs(dogs) {
+	function changeDogs(change) {
 		state.update($state => {
-			if (dogs >= 0) $state.dogs = dogs
+			if ($state.dogs >= 0) $state.dogs += change
 		})
 	}
-
-	$: dogs = $state.dogs
 </script>
+
+<svelte:options immutable={true}/>
 
 <Layout name="immer-store" state={$state}>
 	<div class="buttons">
@@ -23,7 +23,7 @@
 		<button on:click={() => toggleVisibility(false)}>Hide</button>
 	</div>
 	<div class="buttons">
-		<button on:click={() => changeDogs(dogs + 1)}>+</button>
-		<button on:click={() => changeDogs(dogs - 1)}>-</button>
+		<button on:click={() => changeDogs(1)}>+</button>
+		<button on:click={() => changeDogs(-1)}>-</button>
 	</div>
 </Layout>
