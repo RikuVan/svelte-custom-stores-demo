@@ -6,9 +6,9 @@
 
 <Layout name="local-storage-store" state={$store}>
 	<div class="buttons">
-		<button on:click={() => $store.visible = true}>Show</button>
+		<button on:click={() => ($store.visible = true)}>Show</button>
 
-		<button on:click={() => $store.visible = false}>Hide</button>
+		<button on:click={() => ($store.visible = false)}>Hide</button>
 	</div>
 	<div class="buttons">
 		<button on:click={() => $store.dogs++}>+</button>
