@@ -3,7 +3,7 @@
 	import {state} from "./simple-state-machine-store.js"
 </script>
 
-<Layout name="App3.svelte" state={$state}>
+<Layout name="simple-state-machine-store" state={$state}>
 	<div class="buttons">
 		<button on:click={() => state.send('SHOW')}>Show</button>
 
