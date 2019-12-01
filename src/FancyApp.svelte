@@ -17,15 +17,13 @@
 	$: dogs = $state.dogs
 </script>
 
-<Layout name="App4.svelte" state={$state}>
+<Layout name="immer-store" state={$state}>
 	<div class="buttons">
 		<button on:click={() => toggleVisibility(true)}>Show</button>
-
 		<button on:click={() => toggleVisibility(false)}>Hide</button>
 	</div>
 	<div class="buttons">
 		<button on:click={() => changeDogs(dogs + 1)}>+</button>
-
 		<button on:click={() => changeDogs(dogs - 1)}>-</button>
 	</div>
 </Layout>

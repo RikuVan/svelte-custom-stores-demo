@@ -35,11 +35,11 @@
 	<p>Controlled from {name}</p>
 	<p>
 		Current:
-		<strong>{state.visible}</strong>
+		<strong>{state ? "VISIBLE" : 'HIDDEN'}</strong>
 	</p>
 	<slot />
 </div>
 
-{#each [...Array(state.dogs).keys()] as d, i (i)}
-	<DogPopup idx={i + 1} />
+{#each [1, 2] as d (d)}
+	<DogPopup idx={d} />
 {/each}

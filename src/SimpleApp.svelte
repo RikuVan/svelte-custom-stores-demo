@@ -4,10 +4,9 @@
 	// import { state } from './observable-store.js'
 </script>
 
-<Layout name="App1.svelte" state={$state}>
+<Layout name="basic-store" state={$state}>
 	<div class="buttons">
 		<button on:click={() => ($state = true)}>Show</button>
-
 		<button on:click={() => ($state = false)}>Hide</button>
 	</div>
 </Layout>
