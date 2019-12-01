@@ -6,7 +6,7 @@
 	//3 import { state } from './simple-state-machine-store.js'
 	//4 import { state } from './immer-store.js'
 	//5 import { store } from './xstate-store.js'
-	import {store} from "./immer-actions-store.js"
+	import {store} from "./local-storage-store.js"
 
 	export let idx = 1
 
