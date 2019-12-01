@@ -1,12 +1,13 @@
-import { writable } from 'svelte/store'
+import {writable} from "svelte/store"
 
 function createStore(init, reducer) {
-	const devTools = window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__.connect()
+	const devTools =
+		window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__.connect()
 
-	const { update, subscribe } = writable(init)
+	const {update, subscribe} = writable(init)
 
 	function dispatch(action) {
-		update((state) => {
+		update(state => {
 			devTools.send(action, state)
 			return reducer(state, action)
 		})
@@ -20,9 +21,9 @@ function createStore(init, reducer) {
 
 function reducer(state, action) {
 	switch (action) {
-		case 'SHOW':
+		case "SHOW":
 			return true
-		case 'HIDE':
+		case "HIDE":
 			return false
 		default:
 			return state

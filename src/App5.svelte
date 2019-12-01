@@ -1,26 +1,18 @@
 <script>
-	import Layout from './Layout.svelte'
-  import { store } from './xstate-store.js'
-  const { state, send } = store
+	import Layout from "./Layout.svelte"
+	import {store} from "./immer-actions-store.js"
+	const {actions} = store
 </script>
 
-<Layout name="App4.svelte" state={$state}>
+<Layout name="immer-actions-store" state={$store}>
 	<div class="buttons">
-		<button on:click={() => send('SHOW')}>
-			Show
-		</button>
+		<button on:click={actions.show}>Show</button>
 
-		<button on:click={() => send('HIDE')}>
-			Hide
-		</button>
-  </div>
-  <div class="buttons">
-		<button on:click={() => send('INC')}>
-			+
-		</button>
+		<button on:click={actions.hide}>Hide</button>
+	</div>
+	<div class="buttons">
+		<button on:click={actions.inc}>+</button>
 
-		<button on:click={() => send('DEC')}>
-			-
-		</button>
+		<button on:click={actions.dec}>-</button>
 	</div>
 </Layout>

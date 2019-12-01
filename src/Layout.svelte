@@ -1,20 +1,9 @@
 <script>
-  import DogPopup from './DogPopup.svelte'
-   
-  export let name
-  export let state
+	import DogPopup from "./DogPopup.svelte"
 
+	export let name
+	export let state
 </script>
-
-<div>
-  <p>Controlled from {name}</p>
-	<p>Current: <strong>{state.visible}</strong></p>
-  <slot/>
-</div>
-
-{#each [...Array(state.context.dogs).keys()] as d, i (i)} 
-  <DogPopup idx={i + 1} />
-{/each}
 
 <style>
 	div {
@@ -31,7 +20,7 @@
 		align-items: center;
 		padding: 20px;
 	}
-	
+
 	:global(.buttons) {
 		display: flex;
 		flex-direction: row;
@@ -41,3 +30,16 @@
 		margin-left: 10px;
 	}
 </style>
+
+<div>
+	<p>Controlled from {name}</p>
+	<p>
+		Current:
+		<strong>{state.visible}</strong>
+	</p>
+	<slot />
+</div>
+
+{#each [...Array(state.dogs).keys()] as d, i (i)}
+	<DogPopup idx={i + 1} />
+{/each}

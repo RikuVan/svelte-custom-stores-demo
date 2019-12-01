@@ -1,7 +1,7 @@
-import { writable } from 'svelte/store'
-import produce from 'immer'
+import {writable} from "svelte/store"
+import produce from "immer"
 
-const immerStore = (value) => {
+const immerStore = value => {
 	const store = writable(value)
 
 	function set(new_value) {
@@ -12,9 +12,9 @@ const immerStore = (value) => {
 
 	return {
 		set,
-		update: (fn) => set(produce(value, fn)),
+		update: fn => set(produce(value, fn)),
 		subscribe: store.subscribe
 	}
 }
 
-export const state = immerStore({ visible: true, dogs: 0 })
+export const state = immerStore({visible: true, dogs: 0})
