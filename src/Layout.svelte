@@ -37,6 +37,10 @@
 		Current:
 		<strong>{state.visible}</strong>
 	</p>
+	<p>
+		Dog Panels:
+		<strong>{state.dogs}</strong>
+	</p>
 	<slot />
 </div>
 
