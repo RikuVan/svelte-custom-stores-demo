@@ -7,10 +7,15 @@
     "start": "sirv public",
     "format-svelte": "prettier --write --plugin-search-dir=. ./src/**/*.svelte",
     "format-js": "prettier --config ./.prettierrc --write ./src/**/*.js",
-    "format": "npm run format-js && npm run format-svelte"
+    "format": "npm run format-js && npm run format-svelte",
+    "test": "jest"
   },
   "devDependencies": {
+    "@babel/core": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
     "@rollup/plugin-replace": "^2.2.1",
+    "babel-jest": "^24.9.0",
+    "jest": "^24.9.0",
     "prettier": "^1.19.1",
     "prettier-plugin-svelte": "^0.7.0",
     "rollup": "^1.27.5",
@@ -23,9 +28,18 @@
   },
   "dependencies": {
     "@xstate/fsm": "^1.1.0",
+    "add": "^2.0.6",
     "immer": "^5.0.0",
     "redux": "^4.0.4",
     "rxjs": "^6.5.3",
     "sirv-cli": "^0.4.5"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "transform": {
+      "^.+\\.js?$": "babel-jest"
+    }
   }
 }
