@@ -1,6 +1,6 @@
 <script>
 	import {scale} from "svelte/transition"
-	import {state} from './basic-store.js'
+	import {store} from "./redux-store.js"
 
 	export let idx = 1
 
@@ -12,7 +12,7 @@
 
 	let promise = getDog()
 
-	$: if ($state) promise = getDog()
+	$: if ($store.visible && $store.dogs === idx) promise = getDog()
 </script>
 
 <style>
@@ -38,7 +38,7 @@
 	}
 </style>
 
-{#if $state}
+{#if $store.visible}
 	<!-- remove transition when using dynamic list-->
 	<aside>
 		{#await promise}

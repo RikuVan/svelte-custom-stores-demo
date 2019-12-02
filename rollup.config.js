@@ -1,10 +1,11 @@
-import svelte from 'rollup-plugin-svelte';
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import livereload from 'rollup-plugin-livereload';
-import { terser } from 'rollup-plugin-terser';
+import svelte from 'rollup-plugin-svelte'
+import resolve from 'rollup-plugin-node-resolve'
+import commonjs from 'rollup-plugin-commonjs'
+import replace from '@rollup/plugin-replace'
+import livereload from 'rollup-plugin-livereload'
+import { terser } from 'rollup-plugin-terser'
 
-const production = !process.env.ROLLUP_WATCH;
+const production = !process.env.ROLLUP_WATCH
 
 export default {
 	input: 'src/main.js',
@@ -20,9 +21,13 @@ export default {
 			dev: !production,
 			// we'll extract any component CSS out into
 			// a separate file — better for performance
-			css: css => {
-				css.write('public/build/bundle.css');
+			css: (css) => {
+				css.write('public/build/bundle.css')
 			}
+		}),
+
+		replace({
+			'process.env.NODE_ENV': !production ? JSON.stringify('development') : JSON.stringify('production')
 		}),
 
 		// If you have external dependencies installed from
@@ -32,7 +37,7 @@ export default {
 		// https://github.com/rollup/rollup-plugin-commonjs
 		resolve({
 			browser: true,
-			dedupe: importee => importee === 'svelte' || importee.startsWith('svelte/')
+			dedupe: (importee) => importee === 'svelte' || importee.startsWith('svelte/')
 		}),
 		commonjs(),
 
@@ -51,21 +56,21 @@ export default {
 	watch: {
 		clearScreen: false
 	}
-};
+}
 
 function serve() {
-	let started = false;
+	let started = false
 
 	return {
 		writeBundle() {
 			if (!started) {
-				started = true;
+				started = true
 
-				require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
-					stdio: ['ignore', 'inherit', 'inherit'],
+				require('child_process').spawn('npm', [ 'run', 'start', '--', '--dev' ], {
+					stdio: [ 'ignore', 'inherit', 'inherit' ],
 					shell: true
-				});
+				})
 			}
 		}
-	};
+	}
 }
