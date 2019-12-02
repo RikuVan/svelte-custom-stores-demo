@@ -1,7 +1,6 @@
 <script>
 	import Layout from "./Layout.svelte"
 	import {state} from "./basic-store.js"
-	// import { state } from './observable-store.js'
 </script>
 
 <Layout name="basic-store" state={$state}>

@@ -1,6 +1,7 @@
 <script>
 	import Layout from "./Layout.svelte"
 	import {state} from "./immer-store.js"
+	
 	function toggleVisibility(isVisible) {
 		state.update($state => {
 			$state.visible = isVisible
