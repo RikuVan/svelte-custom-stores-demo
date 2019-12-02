@@ -1,18 +1,14 @@
 <script>
 	import {scale} from "svelte/transition"
-	import {store} from "./redux-store.js"
-
+	import {state} from './basic-store.js'
 	export let idx = 1
-
 	const getDog = async () => {
 		const res = await fetch("https://dog.ceo/api/breeds/image/random")
 		const data = await res.json()
 		return data
 	}
-
 	let promise = getDog()
-
-	$: if ($store.visible && $store.dogs === idx) promise = getDog()
+	$: if ($state) promise = getDog()
 </script>
 
 <style>
@@ -31,16 +27,15 @@
 		border-radius: 5px;
 		background: cadetblue;
 	}
-
 	img {
 		max-height: 250px;
 		max-width: 300px;
 	}
 </style>
 
-{#if $store.visible}
+{#if $state}
 	<!-- remove transition when using dynamic list-->
-	<aside>
+	<aside transition:scale>
 		{#await promise}
 			<p>...waiting</p>
 		{:then data}

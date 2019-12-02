@@ -1,6 +1,5 @@
 <script>
 	import DogPopup from "./DogPopup.svelte"
-
 	export let name
 	export let state
 </script>
@@ -20,12 +19,10 @@
 		align-items: center;
 		padding: 20px;
 	}
-
 	:global(.buttons) {
 		display: flex;
 		flex-direction: row;
 	}
-
 	:global(.buttons) > button:last-of-type {
 		margin-left: 10px;
 	}
@@ -35,15 +32,11 @@
 	<p>Controlled from {name}</p>
 	<p>
 		Current:
-		<strong>{state.visible ? 'VISIBLE' : 'HIDDEN'}</strong>
-	</p>
-	<p>
-		Dogs:
-		<strong>{state.dogs}</strong>
+		<strong>{state ? "VISIBLE" : 'HIDDEN'}</strong>
 	</p>
 	<slot />
 </div>
 
-{#each [...Array(state.dogs).keys()] as d, i (i)}
-	<DogPopup idx={i + 1} />
+{#each [1, 2] as d (d)}
+	<DogPopup idx={d} />
 {/each}
