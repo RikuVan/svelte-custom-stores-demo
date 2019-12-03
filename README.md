@@ -37,11 +37,45 @@ function myStore(value) {
     }
   }
 }
+
+export const state = myStore(false)
+```
+
+Now we can make use of auto-subscription. Without it we would have to do this.
+
+```js
+<script>
+  import {onDestroy} from 'svelte'
+  import {state} from './homemade-store.js'
+
+  let visible = false
+
+  const unsubscribe = state.subscribe(current => {
+    visible = current
+  })
+
+  onDestroy(unsubscribe)
+</script>
+
+{#if visible}
+  <p>Hello world</p>
+{/if}
+```
+
+Instead all we need to do is this.
+
+```js
+<script>
+  import {state} from './homemade-store.js'
+</script>
+{#if $state}
+  <p>Hello world</p>
+{/if}
 ```
 
 ## Svelte has a runtime and it is as skinny as ever
 
-It is not that far to get from my naive store to `writable` store shipped with Svelte: add an `update` method which works along the lines of React's `setState` by taking a function so you can merge your new state with the previous state, and add some optimizations and further subscription cleanup. In addition to the `writable` store, there are also a `readable` store--just a writable store without the `set` and `update` methods, and a `derived` store which allows you to compute state from multiple stores. The docs explain the basic functionality of these purposefully slim stores so I will focus here more on how turn a basic writable store into something that better fits your needs.
+It is not that far to get from my naive store to the `writable` store shipped with Svelte: add an `update` method which works along the lines of React's `setState` by taking a function so you can merge your new state with the previous state, and add some optimizations and further subscription cleanup. In addition to the `writable` store, there are also a `readable` store--just a writable store without the `set` and `update` methods, and a `derived` store which allows you to compute state from multiple stores. [The docs](https://svelte.dev/docs#svelte_store) explain the basic functionality of these purposefully slim stores so I will focus here more on how turn a basic writable store into something that better fits your needs.
 
 ## Hey, that looks a lot like an observable!?
 
@@ -63,7 +97,7 @@ Now we can do all sorts of fancy things by piping our state updates through Rxjs
 
 ## Constraining updates
 
-The first simple step in creating a safer, scable store, is to not allow your store's internal state to be directly over-written. Lets start with a simple set of buttons with which we can show or hide some components some dog pictures that pop up. At this point, you may want to follow along by cloning or looking at the [example repo](https://github.com/RikuVan/svelte-custom-stores-demo). There are branches with versions of the app working with different custom stores. I am not going to go through all the code, use to make this little app, but the key parts will be a `SimpleApp.js` (later FancyApp and on branches just App), `DogPopup.js` and a store--at this point we are just exporting a writable store `export state = writable(false)` in `basic-store.js`, which we use to update state in our button controls in `SimpleApp.svelte`.
+The first simple step in creating a safer, scalable store, is to not allow your store's internal state to be directly over-written. Lets start with a simple set of buttons with which we can show or hide some components, in my example some dog pictures that pop up. At this point, you may want to follow along by cloning or looking at the [example repo](https://github.com/RikuVan/svelte-custom-stores-demo). There are branches with versions of the app working with different custom stores. I am not going to go through all the code, use to make this little app, but the key parts will be a `SimpleApp.js` (later FancyApp and on branches just App), `DogPopup.js` and a store--at this point we are just exporting a writable store `export state = writable(false)` in `basic-store.js`, which we use to update state in our button controls in `SimpleApp.svelte`.
 
 ```js
 <div class="buttons">
@@ -118,7 +152,7 @@ While by default Svelte's compiler does not assume we will not mutate objects di
 
 `<svelte:options immutable={true}/>`
 
-Now the compiler will be able optimize our code, ignoring deep mutations. We could try to ensure this manually in our reducer using the spread operator, or we could be lazy and use `Immer`. Let's be lazy. By wrapping updates in Immer's `produce` function, we can write easy-to-understand, imperative code, while ensuring that any updates we make result in a copied object. There are a few simple rules when using Immer, so it is worth reading the docs. Let's create our immer store, but before we do that let's add a little more state to our app to make it more interesting. Now we will make the number of dog popup thingies dynamic with increment/decrement buttons. Right now our popup components are created in an `#each` directive with a hard-coded list, `[1, 2]`. We will make it dynamic.
+Now the compiler will be able optimize our code, ignoring deep mutations. We could try to ensure this manually in our reducer using the spread operator, or we could be lazy and use `Immer`. Let's be lazy. By wrapping updates in Immer's `produce` function, we can write easy-to-understand, imperative code, while ensuring that any updates we make result in a copied object. There are a few simple rules when using Immer, so it is worth reading [the Immer docs](https://immerjs.github.io/immer/docs/introduction). Let's create our immer store, but before we do that let's add a little more state to our app to make it more interesting. Now we will make the number of dog popup thingies dynamic with increment/decrement buttons. Right now our popup components are created in an `#each.../each` directive with a hard-coded list, `[1, 2]`. We will make it dynamic.
 
 ```js
 {#each [...Array(state.dogs).keys()] as d (d)}
@@ -152,7 +186,7 @@ export const state = immerStore({visible: true, dogs: 0})
 
 ```
 
-The `produce` function takes an initial `base state` followed by an update function in which immer passes the `draft state` to the update function, so it may be a bit tricky to see what is happening in the update method at first glance. Immer's `produce` also has a curried version which we will use later. Here is one way you could use it in your buttons.
+The `produce` function takes an initial `base state` followed by an update function in which Immer passes the `draft state` to the update function, so it may be a bit tricky to see what is happening in the update method at first glance. Immer's `produce` also has a curried version which we will use later. Here is one way you could use it in your buttons.
 
 ```js
 <script>
@@ -235,9 +269,9 @@ const immerActionsStore = (value, actions) => {
 export const store = immerActionsStore(initialState, actions)
 ```
 
-Now we have our immutability and simple state updates thanks to `Immer` plus the guarantee that updates happen via actions, like so `actions.show()` in our button. Notice that with Immer you don't return from an action if mutating, only if returning new state. We just need to map over the actions passed into our new store is to make sure they happen inside `produce` and we will return only these actions from the store. Now things are relatively uncomplicated but constrained. This will work for me in simpler cases. But at some point we will run into new requirements. Maybe we can only add dogs when they are visible and of course we want to avoid having negative dogs or too many dogs for the screen.
+Now we have our immutability and simple state updates thanks to `Immer` plus the guarantee that updates happen via actions, like so `actions.show()` in our button. Notice that with Immer you don't return from an action if mutating, only if returning new state. Inside our immer-store, we map over the actions argument, an object with update methods, to wrap each method in `produce` which is wrapped by the writable's `update`. We will return only these actions from the store, together with the subscribe method. Now things are relatively uncomplicated but constrained. This will work for me in simpler cases. But at some point we will run into new requirements. Maybe we can only add dogs when they are visible and of course we want to avoid having negative dogs or too many dogs for the screen.
 
-## Let's make a machine
+## Time to get serious - a state machine
 
 What we want now is the ability to ensure that certain actions are only dispatched in states where they are allowed to happen. We also want to guard against certain unintended updates, e.g. negative dogs. It's time for a full-blow state machine. While we could create our little homemade state machine (see `simple-state-machine-store.js` which is copied from a version posted in the Svelte Discord server) or we could just use `Xstate` which adheres to the SCXML specification and provides a lot of extra goodness, including visualization tools, test helpers and much more. Xstate also provides its own interpreter. So, as is the case in most custom stores, all we need to do is make sure Xstate works with the Svelte store contract. Here is one way we could do this.
 
