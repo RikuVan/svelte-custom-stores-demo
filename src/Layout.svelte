@@ -7,7 +7,8 @@
 
 <div>
   <p>Controlled from {name}</p>
-	<p>Current: <strong>{state.visible}</strong></p>
+  <p>Current: <strong>{state.context.visible}</strong></p>
+  <p>Dogs: <strong>{state.context.dogs}</strong></p>
   <slot/>
 </div>
 
