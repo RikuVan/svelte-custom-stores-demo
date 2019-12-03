@@ -11,7 +11,7 @@ The answer to the problem of creating stores that enforce conventions, such as s
 
 ## The Svelte `$` and the subscription contract
 
-Arguably what is interesting about Svelte's approach to state management is not the store itself but the auto-subscription that is possible because of the Svelte compiler. By simply appending a `$` to a variable in a component, the compiler will know to expect an object with a subscribe method on it and generate the boilerplate of subscribing and unsubscribing for you. Once you start using this auto-subscription feature, you will wonder how you ever lived without it--the `$`s will flow. So for the `$` to work with any `store`, the [contract](https://svelte.dev/docs#4_Prefix_stores_with_$_to_access_their_values) requires your object has a `subscribe` function which takes a callback and returns an unsubscribe method. Moreover, if there is a `set` method, the compiler will use this for updates. Try making your own naive little event bus--that is all it really is--and you will see it just works.
+Arguably what is interesting about Svelte's approach to state management is not the store itself but the auto-subscription that is possible because of the Svelte compiler. By simply appending a `$` to a variable in a component, the compiler will know to expect an object with a subscribe method on it and generate the boilerplate of subscribing and unsubscribing for you. Once you start using this auto-subscription feature, you will wonder how you ever lived without it--the `$`s will flow. So for the `$` to work with any `store`, the [contract](https://svelte.dev/docs#4_Prefix_stores_with_$_to_access_their_values) requires your object has a `subscribe` method which takes a callback and returns an unsubscribe function. Moreover, if there is a `set` method, the compiler will use this for updates. Try making your own naive little event bus--that is all it really is--and you will see it just works.
 
 ```js
 function myStore(value) {
@@ -156,7 +156,7 @@ The `produce` function takes an initial `base state` followed by an update funct
 
 ```js
 <script>
-	import Layout from "./Layout.svelte"
+  import Layout from "./Layout.svelte"
   import {state} from "./immer-store.js"
   
 	function toggleVisibility(isVisible) {
@@ -309,7 +309,7 @@ const dog_machine = createMachine(
 export const store = useMachine(dog_machine)
 ```
 
-There is quite a bit going on here that is very specific to Xstate: the definition of the machine, the updates of the machine context, the definition of guards, and so on. I will point you to the Xstate docs to get a handle on all that. In this case, we can use a `readable` store (just as with Redux) to make Xstate conform to the contract because Xstate has its own eventing system for updates. The `readable` store takes a function as a second argument which has its own internal `set` method, allowing us to wrap any api, like Xstate or Redux that has its own built in subscription model but with a slightly different api. In this case, we need to ensure that we call `start` and `stop`. There are certainly other ways to accomplish this without using a Svelte store at all. A custom svelte store can be truly custom. Checkout the `xstate_store` branch to poke it a bit.
+There is quite a bit going on here that is very specific to Xstate: the definition of the machine, the updates of the machine context, the definition of guards, and so on. I will point you to the [Xstate docs](https://xstate.js.org/docs/guides/start.html) to get a handle on all that. In this case, we can use a `readable` store (just as with Redux) to make Xstate conform to the contract because Xstate has its own eventing system for updates. The `readable` store takes a function as a second argument which has its own internal `set` method, allowing us to wrap any api, like Xstate or Redux that has its own built in subscription model but with a slightly different api. In this case, we need to ensure that we call `start` and `stop`. There are certainly other ways to accomplish this without using a Svelte store at all. A custom svelte store can be truly custom. To make this work in our code we now need to use, eg., `store.send('SHOW')` in our click handlers and our flags around now on `store.context`. Checkout the `xstate_store` branch to poke it a bit.
 
 ## Now your `$`'s and your stores
 
