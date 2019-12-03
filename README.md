@@ -1,17 +1,17 @@
-# Svelte stores - whatever you want them to be
+# Why are there so many `$`s in Svelte code and how to get the most out of them.
 
 Blog post draft
 ---
 
-Shortly after the release of Svelte version 3, I watched the [Rethinking reactivity](https://svelte.dev/blog/svelte-3-rethinking-reactivity) by presentation Rich Harris and I was impressed enough to have a run through the tutorial and start building a side-project in Svelte. It felt that with Svelte I was able to create UI's concisely, and I liked it's small kb footprint as well thanks to its compiler. However, as soon as my project started to grow I started to wonder how to govern the state more sanely than just passing props. Svelte offers stores for managing state across components, but they comprise a relatively low-level api that do not enforce any conventions.
+Shortly after the release of Svelte version 3, I watched [Rethinking reactivity](https://svelte.dev/blog/svelte-3-rethinking-reactivity) by Rich Harris. Rich is both provocative and convincing, so I ran through the [tutorial](https://svelte.dev/tutorial/basics) and started remaking our [meetup site UI](https://www.webdevandsausages.org/) in Svelte. As a tool, Svelte felt both ergonomic and and easy to apply right away to difficult problems. In this case, the tool is mainly a compiler, reducing your framework code into vanilla javascript. There is a bit of magic happening; for example, the compiler takes `$`s and turns them into subscriptions--more on that later. However, as my experiments started to grow in size, I wondered how to govern my app state more sanely. Svelte offers stores for managing state across components, but they comprise a relatively low-level api that do not enforce any conventions.
 
 ## Why custom stores?
 
-The answer to the problem of creating stores that enforce conventions--more exactly stores that constrain updates--is only very briefly discussing in the Svelte docs in terms of `custom stores`. I would like to continue here where the docs leave off, offering some simple examples of how to make your Svelte stores into something more robust and scalable for large applications.
+The answer to the problem of creating stores that enforce conventions, such as stores that constrain updates, is only very briefly discussed in a [Svelte doc example](https://svelte.dev/examples#custom-stores) in terms of `custom stores`. I would like to continue in this post where the docs leave off, offering some further examples of how to make your Svelte stores into something more robust and scalable for large applications.
 
-## The Svelte subscription contract
+## The Svelte `$` and the subscription contract
 
-Arguable what is interesting about Svelte's approach to state management is not the store itself but the auto-subscription that is possible because of the Svelte compiler. By simply appending a `$` to a variable in a component, the compiler will know to expect an object with a subscribe method on it and generate the boilerplate of subscribing and unsubscribing for you. Once you start using this auto-subscription feature, you will wonder how you ever lived without it. So for any `store` to work, the [contract](https://svelte.dev/docs#4_Prefix_stores_with_$_to_access_their_values), requires your object has a `subscribe` function which takes a callback and returns an unsubscribe method. Moreover, if there is a `set` method, the compiler will use this for updates. Try making your own naive little event bus and you will see it just works.
+Arguably what is interesting about Svelte's approach to state management is not the store itself but the auto-subscription that is possible because of the Svelte compiler. By simply appending a `$` to a variable in a component, the compiler will know to expect an object with a subscribe method on it and generate the boilerplate of subscribing and unsubscribing for you. Once you start using this auto-subscription feature, you will wonder how you ever lived without it--the `$`s will flow. So for the `$` to work with any `store`, the [contract](https://svelte.dev/docs#4_Prefix_stores_with_$_to_access_their_values) requires your object has a `subscribe` function which takes a callback and returns an unsubscribe method. Moreover, if there is a `set` method, the compiler will use this for updates. Try making your own naive little event bus--that is all it really is--and you will see it just works.
 
 ```js
 function myStore(value) {
@@ -39,13 +39,13 @@ function myStore(value) {
 }
 ```
 
-## The Svelte runtime stores
+## Svelte has a runtime and it is as skinny as ever
 
-It is not that far, to get from my naive version above to Svelte `writable` store. Some optimizations, an `update` method which works along the lines of React's setState by taking a function so you can merge your new state with the previous state, and some cleanup. In addition to the writable store, there are also a `readable` store, a writable store without the set and update, and a `derived` store which allows you to compute state from multiple stores. The docs explain all these stores and I will focus here more on how iterate on a basic writable store to create something new.
+It is not that far to get from my naive store to `writable` store shipped with Svelte: add an `update` method which works along the lines of React's `setState` by taking a function so you can merge your new state with the previous state, and add some optimizations and further subscription cleanup. In addition to the `writable` store, there are also a `readable` store--just a writable store without the `set` and `update` methods, and a `derived` store which allows you to compute state from multiple stores. The docs explain the basic functionality of these purposefully slim stores so I will focus here more on how turn a basic writable store into something that better fits your needs.
 
-## Hey, that looks a lot like an observable, doesn't it?
+## Hey, that looks a lot like an observable!?
 
-Indeed, fortunately this simple contract is very close to that of an observable, such as those provided by Rxjs. `Set` is basically equivalent to `next`. So if we like we could replace our crappy event bus with a `BehaviourSubject`.
+Indeed, this simple contract is very close to that of an observable, such as those provided by [Rxjs](https://rxjs.dev/). `Set` is basically equivalent to `next` in the observable world. So if we like, we could replace our humble event bus above with an observable or a subject. I would prefer the `BehaviourSubject`, which allows us to kick off with an initial value.
 
 ```
 import {BehaviorSubject} from "rxjs"
@@ -59,11 +59,11 @@ function observableStore(initial) {
 export const state = observableStore(false)
 ```
 
-Now we can do all sorts of fancy things by piping our state updates through Rxjs operators, for example `store.pipe(debounceTime(400), take(5))`.
+Now we can do all sorts of fancy things by piping our state updates through Rxjs operators, for example `store.pipe(debounceTime(400), take(5))`. If you are a huge fan of Rxjs, you might just stop reading here. But for me it is overkill in many cases.
 
 ## Constraining updates
 
-But introducing a Rxjs is a big change and potentially overkill. The first simple step in creating a safer, scable store, is to not allow your store's internal state to be directly over-written. Lets start with a simple set of buttons with which we can show or hide some components, in my odd example, some dog pictures that pop up. At this point we are just exporting a writable store `export state = writable(false)`, which we use in with our button controls in our `SimpleApp.svelte`.
+The first simple step in creating a safer, scable store, is to not allow your store's internal state to be directly over-written. Lets start with a simple set of buttons with which we can show or hide some components some dog pictures that pop up. At this point, you may want to follow along by cloning or looking at the [example repo](https://github.com/RikuVan/svelte-custom-stores-demo). There are branches with versions of the app working with different custom stores. I am not going to go through all the code, use to make this little app, but the key parts will be a `SimpleApp.js` (later FancyApp and on branches just App), `DogPopup.js` and a store--at this point we are just exporting a writable store `export state = writable(false)` in `basic-store.js`, which we use to update state in our button controls in `SimpleApp.svelte`.
 
 ```js
 <div class="buttons">
@@ -72,7 +72,7 @@ But introducing a Rxjs is a big change and potentially overkill. The first simpl
 </div>
 ```
 
- At this point we can mutate state willy-nilly in any way we like; this is probably not a good idea. Let's use some concepts popularized by Redux, without resorting to Redux itself (yet) to make this store a little safer. A first step would be to dipatch actions and update via a reducer, something along the lines of `useReducer` in React. This is easy. Lets start with a simple set of buttons with which we can show or hide some components, in my odd example, some dog pictures that pop up. At this point, you may want to follow along by cloning or looking at the [example repo](https://github.com/RikuVan/svelte-custom-stores-demo)(there are branches with versions of the app working with different custom stores). So let's add the simplest possible reducer. We will just use strings for our actions instead of objects with a type property--we can improve this later. Still there is a built-in bonus, now that our updates are happening via a serializable type, we can use the redux dev tools. Let's do it.
+ At this point we can mutate state willy-nilly in any way we like; nothing prevents you from doing `$state = new GiantBrainFart()` somewhere. So maybe the plain `writable` is not always a good idea. Let's use some state-handling patterns popularized by Elm and Redux, without resorting to Redux itself (yet) to make this store a little safer. A first step would be to dispatch actions and update state via a reducer, something along the lines of `useReducer` in React. This is easy. So let's add the simplest possible reducer. We will just use strings for our actions instead of objects with a type property--we can improve this later. Still there is a built-in bonus, now that our updates are happening via a serializable type, we can use the redux dev tools. Let's do it.
 
 ```js
 function createStore(init, reducer) {
@@ -108,9 +108,9 @@ function reducer(state, action) {
 export const store = createStore(false, reducer)
 
 ```
-Then we would need to make a few changes to our buttons, since we are not going to dispatch actions, e.g `store.dispatch('SHOW')`, and everything should work as before. Check out the updates in your dev tools.
+We need to make a few updates to our buttons since we are now going to dispatch actions, `store.dispatch('SHOW')`, and everything should work as before. Check out the `reducer_store` branch and see the updates now in your dev tools.
 
-At this point, you might be thinking that I would prefer full-blown Redux. And as it happens, it is not hard to make Redux work with the Svelte store contract. To see how this would work, have a look at `redux-store.js` and the `redux_store` branch.
+At this point, you might be thinking that you would prefer full-blown Redux. And as it happens, it is not hard to make Redux work with the Svelte store contract. To see how this would work, have a look at `redux-store.js` and the `redux_store` branch. But I am not ready for that level of boilerplate yet, let's try some other things.
 
 ## Enforcing immutability
 
@@ -118,15 +118,15 @@ While by default Svelte's compiler does not assume we will not mutate objects di
 
 `<svelte:options immutable={true}/>`
 
-Now the compiler will optimize our code by expecting us to always return new objects, when updating state. We could try do this manually in our reducer store, or we be lazy and use `Immer`. By wrapping updates in Immer's `produce` function, we can write easy to understan, imperative code, while ensuring that any updates we make result to a copied object. There are a few simple rules when using Immer, so it is worth reading the docs. Let's create our immer store, but before we do that let's add a little more state to our app to make it more interesting. Now we will make the number of dog popup thingies dynamic with increment/decrement buttons. Right now our popup components are created in an `#each` directive with a hard-coded list. We will make it dynamic.
+Now the compiler will be able optimize our code, ignoring deep mutations. We could try to ensure this manually in our reducer using the spread operator, or we could be lazy and use `Immer`. Let's be lazy. By wrapping updates in Immer's `produce` function, we can write easy-to-understand, imperative code, while ensuring that any updates we make result in a copied object. There are a few simple rules when using Immer, so it is worth reading the docs. Let's create our immer store, but before we do that let's add a little more state to our app to make it more interesting. Now we will make the number of dog popup thingies dynamic with increment/decrement buttons. Right now our popup components are created in an `#each` directive with a hard-coded list, `[1, 2]`. We will make it dynamic.
 
-```
+```js
 {#each [...Array(state.dogs).keys()] as d (d)}
 	<DogPopup idx={d} />
 {/each}
 ```
 
-If you are wondering about the odd looking `(d)`, this keys the component, ensuring they are not sharing anything / optimized by the compiler. You don't often need to key items in Svelte, but sometimes it is essential and the resulting bugs can be hard to understand at first. Now we are ready for our new immutable store.
+If you are wondering about the odd looking `(d)`, this keys the component, ensuring that the compiler doesn't do any fancy sharing of objects that leads to surprising bugs. You don't often need to key items in Svelte, but I have run into some cases where it is essential. Now we are ready for our new immutable store.
 
 ```js
 import {writable} from "svelte/store"
@@ -152,7 +152,7 @@ export const state = immerStore({visible: true, dogs: 0})
 
 ```
 
-The `produce` function is curried, so it may be a bit tricky to see what is happening immediately in the update function. You will pass in a function, together with the previous state, that will then take a new state. Here is one way you could use it in your buttons.
+The `produce` function takes an initial `base state` followed by an update function in which immer passes the `draft state` to the update function, so it may be a bit tricky to see what is happening in the update method at first glance. Immer's `produce` also has a curried version which we will use later. Here is one way you could use it in your buttons.
 
 ```js
 <script>
@@ -189,7 +189,7 @@ Now we are happily living in the land of immutable state. To see all the parts w
 
 ## Combining actions with immutable state
 
-Now we are getting close to where we would like to be, but to be honest I would use anything we have seen so far directly myself. What I would like to do is have the guarantee's that come with being limited to flux-like actions with a type and payload, without all the boilerplate that comes with pure redux. Taking inspiration from [useMethods](https://github.com/pelotom/use-methods) react hook try to achieve something similar.
+We are getting close to where we would like to be, but to be honest I would personally not use anything we have seen so far as is. What I would like to do is have the guarantees that come with being limited to flux-like actions with a type and payload together with Immer's goodness, without all the boilerplate that comes with Redux. Taking inspiration from a react hook I like called [useMethods](https://github.com/pelotom/use-methods), let's try to achieve something similar.
 
 ```js
 import {writable} from "svelte/store"
@@ -235,11 +235,11 @@ const immerActionsStore = (value, actions) => {
 export const store = immerActionsStore(initialState, actions)
 ```
 
-Now we have our immutability and simple state updates thanks to `Immer` plus the guarantee that updates happen via actions, like so `actions.show()` in our button. I personally fairly happy with this when things are relatively uncomplicated. However, at some point we will run into new requirements. Maybe we can only add dogs when they are visible and of course we want to avoid having negative dogs or too many dogs for the screen.
+Now we have our immutability and simple state updates thanks to `Immer` plus the guarantee that updates happen via actions, like so `actions.show()` in our button. Notice that with Immer you don't return from an action if mutating, only if returning new state. We just need to map over the actions passed into our new store is to make sure they happen inside `produce` and we will return only these actions from the store. Now things are relatively uncomplicated but constrained. This will work for me in simpler cases. But at some point we will run into new requirements. Maybe we can only add dogs when they are visible and of course we want to avoid having negative dogs or too many dogs for the screen.
 
-## A state machine store
+## Let's make a machine
 
-What we want now is the ability to make sure that certain actions are only dispatched in states where they are allowed to happen. We also want to guard against certain unintended updates, e.g. negative dogs. It's time for a full-blow state machine. While we could create our only little state machine (see `simple-state-machine-store.js` which is copied from a version posted in the Svelte Discord server) or we could just use `XState` which adhears to the SCXML specification and provides a lot of extra goodness, including visualization tools, test helpers and much more. XState provides its own interpreter. So, as is the case in most custom stores, all we need to do is make sure Xstate works with the Svelte store contract. Here is one way we could do this.
+What we want now is the ability to ensure that certain actions are only dispatched in states where they are allowed to happen. We also want to guard against certain unintended updates, e.g. negative dogs. It's time for a full-blow state machine. While we could create our little homemade state machine (see `simple-state-machine-store.js` which is copied from a version posted in the Svelte Discord server) or we could just use `Xstate` which adheres to the SCXML specification and provides a lot of extra goodness, including visualization tools, test helpers and much more. Xstate also provides its own interpreter. So, as is the case in most custom stores, all we need to do is make sure Xstate works with the Svelte store contract. Here is one way we could do this.
 
 ```js
 export {readable} from "svelte/store"
@@ -254,7 +254,7 @@ const decrement = assign({
 })
 
 const dogsCanChange = (ctx, event) => {
-	if (event.type === "DEC" && ctx <= 0) false
+	if (event.type === "DEC" && ctx <= 10) false
 	if (event.type === "INC" && ctx >= 0) false
 	return true
 }
@@ -309,11 +309,11 @@ const dog_machine = createMachine(
 export const store = useMachine(dog_machine)
 ```
 
-There is quite a bit going on here that is very specific to Xstate, the definition of the machine, the updates of the machine context, the definition of guards, etc. I will point you to the Xstate docs to better understand what is going on. In this case, we can use a `readable` store (just as with Redux) to make Xstate conform to the contract because Xstate has its own eventing system for updates. The `readable` store takes a function as a second argument which has its own internal `set` method, allowing us to wrap any api, like Xstate or Redux that has its own built in subscription model but with a slightly different api. In this case, we need to ensure that we call `start` and `stop`. There are certainly other ways to accomplish this without using a Svelte store at all.
+There is quite a bit going on here that is very specific to Xstate: the definition of the machine, the updates of the machine context, the definition of guards, and so on. I will point you to the Xstate docs to get a handle on all that. In this case, we can use a `readable` store (just as with Redux) to make Xstate conform to the contract because Xstate has its own eventing system for updates. The `readable` store takes a function as a second argument which has its own internal `set` method, allowing us to wrap any api, like Xstate or Redux that has its own built in subscription model but with a slightly different api. In this case, we need to ensure that we call `start` and `stop`. There are certainly other ways to accomplish this without using a Svelte store at all. A custom svelte store can be truly custom. Checkout the `xstate_store` branch to poke it a bit.
 
-## The next generation of Svelte stores
+## Now your `$`'s and your stores
 
-I hope you have seen what a little compiler magic and a simple, well-thought api can accomplish. The store `contract` and the runtime stores offered by Svelte should not be seen as the end of state management with Svelte, but the beginning. Please play around and make your own custom store, or adopt your preferred to state management library to Svelte, and share your ideas with the rest of us.
+I hope you have seen what a little compiler magic and a simple, well-thought api can accomplish. The `store contract` and the runtime offered by Svelte should not be seen as the end of state management with Svelte, but the beginning. I look forward to what is coming as new custom stores pop up in user land, adaptations of your preferred state management patterns or libraries or then something really new. Please share your ideas with the rest of us.
 
 ---
 

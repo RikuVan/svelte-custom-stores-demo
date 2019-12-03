@@ -1,23 +1,23 @@
-import {readable} from "svelte/store"
-import {interpret, createMachine, assign} from "@xstate/fsm"
+import { readable } from 'svelte/store'
+import { interpret, createMachine, assign } from '@xstate/fsm'
 
 const increment = assign({
-	dogs: context => context.dogs + 1
+	dogs: (context) => context.dogs + 1
 })
 const decrement = assign({
-	dogs: context => context.dogs - 1
+	dogs: (context) => context.dogs - 1
 })
 const dogsCanChange = (ctx, event) => {
-	if (event.type === "DEC" && ctx <= 0) false
-	if (event.type === "INC" && ctx >= 0) false
+	if (event.type === 'DEC' && ctx <= 10) false
+	if (event.type === 'INC' && ctx >= 0) false
 	return true
 }
 
 export function useMachine(machine, options) {
 	const service = interpret(machine, options)
 
-	const store = readable(machine.initialState, set => {
-		service.subscribe(state => {
+	const store = readable(machine.initialState, (set) => {
+		service.subscribe((state) => {
 			if (state.changed) set(state)
 		})
 
@@ -36,27 +36,27 @@ export function useMachine(machine, options) {
 
 const dog_machine = createMachine(
 	{
-		id: "dogs",
-		initial: "visible",
-		context: {dogs: 0},
+		id: 'dogs',
+		initial: 'visible',
+		context: { dogs: 0 },
 		states: {
 			visible: {
 				on: {
-					HIDE: "invisible",
-					INC: {internal: true, actions: increment},
-					DEC: {internal: true, actions: decrement}
+					HIDE: 'invisible',
+					INC: { internal: true, actions: increment },
+					DEC: { internal: true, actions: decrement }
 				}
 			},
 			invisible: {
 				on: {
-					SHOW: "visible"
+					SHOW: 'visible'
 				}
 			}
 		}
 	},
 	{
-		actions: {increment, decrement},
-		guards: {dogsCanChange}
+		actions: { increment, decrement },
+		guards: { dogsCanChange }
 	}
 )
 
