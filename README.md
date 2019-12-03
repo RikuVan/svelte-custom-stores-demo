@@ -254,8 +254,8 @@ const decrement = assign({
 })
 
 const dogsCanChange = (ctx, event) => {
-	if (event.type === "DEC" && ctx <= 10) false
-	if (event.type === "INC" && ctx >= 0) false
+	if (event.type === "DEC" && ctx.dogs <= 0) return false
+	if (event.type === "INC" && ctx.dogs >= 6) return false
 	return true
 }
 
@@ -289,8 +289,8 @@ const dog_machine = createMachine(
 			visible: {
 				on: {
 					HIDE: "invisible",
-					INC: {internal: true, actions: increment},
-					DEC: {internal: true, actions: decrement}
+					INC: {internal: true, actions: increment, cond: dogsCanChange},
+					DEC: {internal: true, actions: decrement, cond: dogsCanChange}
 				}
 			},
 			invisible: {

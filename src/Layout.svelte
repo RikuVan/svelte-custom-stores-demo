@@ -32,7 +32,7 @@
 	<p>Controlled from {name}</p>
 	<p>
 		Current:
-		<strong>{state ? "VISIBLE" : 'HIDDEN'}</strong>
+		<strong>{state ? 'VISIBLE' : 'HIDDEN'}</strong>
 	</p>
 	<slot />
 </div>

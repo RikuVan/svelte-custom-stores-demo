@@ -4,27 +4,26 @@
 // the rest is up to you
 
 function homemadeStore(value) {
-  let subscribers = []
-  let state = value
-  return {
+	let subscribers = []
+	let state = value
+	return {
+		subscribe(listener) {
+			subscribers.push(listener)
+			return () => {
+				const index = subscribers.indexOf(subscriber)
+				if (index !== -1) {
+					subscribers.splice(index, 1)
+				}
+			}
+		},
 
-    subscribe(listener) {
-      subscribers.push(listener)
-      return () => {
-        const index = subscribers.indexOf(subscriber)
-        if (index !== -1) {
-          subscribers.splice(index, 1)
-        }
-      }
-    },
-
-    set(newValue) {
-      if (state !== newValue) state = newValue
-      if (subscribers.length > 0) {
-        subscribers.forEach(s => s(state))
-      }
-    }
-  }
+		set(newValue) {
+			if (state !== newValue) state = newValue
+			if (subscribers.length > 0) {
+				subscribers.forEach(s => s(state))
+			}
+		}
+	}
 }
 
 export const state = homemadeStore(false)

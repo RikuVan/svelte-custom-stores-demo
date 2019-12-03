@@ -1,7 +1,7 @@
 <script>
 	import Layout from "./Layout.svelte"
 	import {state} from "./immer-store.js"
-	
+
 	function toggleVisibility(isVisible) {
 		state.update($state => {
 			$state.visible = isVisible
@@ -14,7 +14,7 @@
 	}
 </script>
 
-<svelte:options immutable={true}/>
+<svelte:options immutable={true} />
 
 <Layout name="immer-store" state={$state}>
 	<div class="buttons">
