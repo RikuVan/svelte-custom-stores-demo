@@ -1,7 +1,8 @@
 <script>
 	import {scale} from "svelte/transition"
 	import {state} from "./basic-store.js"
-	export let idx = 1
+  export let idx = 1
+  
 	const getDog = async () => {
 		const res = await fetch("https://dog.ceo/api/breeds/image/random")
 		const data = await res.json()
