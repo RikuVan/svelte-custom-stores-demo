@@ -1,4 +1,6 @@
-# Custom stores demo for blog post `Svelte custom stores: get the most for your $`
+# Custom stores demo for blog post
+
+## [`Svelte custom stores: get the most for your $`](https://monad.fi/en/svelte-custom-stores/)
 
 | Custom store                     | Branch with working example |
 | -------------------------------- | --------------------------- |
