@@ -1,18 +1,16 @@
-# Custom stores demo for blog post
+## Custom stores demo for blog post: [`Svelte custom stores: get the most for your $`](https://monad.fi/en/svelte-custom-stores/)
 
-## [`Svelte custom stores: get the most for your $`](https://monad.fi/en/svelte-custom-stores/)
-
-| Custom store                     | Branch with working example |
-| -------------------------------- | --------------------------- |
-| `basic_store.js`                 | master                      |
-| `homemade_store.js`              | master                      |
-| `observable_store.js`            | master                      |
-| `reducer_store.js?`              | reducer_store               |
-| `redux-store.js?`                | redux_store                 |
-| `immer_store.js?`                | immer_store                 |
-| `immer_actions_store.js?`        | immer_actions_store         |
-| `simple-state-machine-store.js?` | simple_state_machine_store  |
-| `xtate_store.js?`                | xstate_store                |
+| Custom store                    | Branch with working example |
+| ------------------------------- | --------------------------- |
+| `basic_store.js`                | master                      |
+| `homemade_store.js`             | master                      |
+| `observable_store.js`           | master                      |
+| `reducer_store.js`              | reducer_store               |
+| `redux-store.js`                | redux_store                 |
+| `immer_store.js`                | immer_store                 |
+| `immer_actions_store.js`        | immer_actions_store         |
+| `simple-state-machine-store.js` | simple_state_machine_store  |
+| `xtate_store.js`                | xstate_store                |
 
 ## Get started
 
